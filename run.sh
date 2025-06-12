@@ -31,5 +31,40 @@ gcloud dataproc batches submit spark \
     --jars=$GCS_JAR_PATH \
     --deps-bucket=gs://$BUCKET_NAME/staging \
     --subnet=default \
+    --version 2.3 \
+    --properties \
+      "spark.executor.cores=4, \
+      spark.executor.memory=16g, \
+      spark.executor.instances=2, \
+      spark.driver.cores=2, \
+      spark.driver.memory=8g, \
+      spark.dynamicAllocation.enabled=true, \
+      spark.dynamicAllocation.minExecutors=2, \
+      spark.dynamicAllocation.maxExecutors=3, \
+      spark.dynamicAllocation.executorAllocationRatio=1.0, \
+      spark.shuffle.service.enabled=true, \
+      spark.dataproc.scaling.version=2, \
+      spark.dataproc.driver.compute.tier=premium, \
+      spark.dataproc.executor.compute.tier=premium, \
+      spark.dataproc.driver.disk.tier=premium, \
+      spark.dataproc.executor.disk.tier=premium, \
+      spark.default.parallelism=1000, \
+      spark.sql.shuffle.partitions=1000, \
+      spark.memory.fraction=0.7, \
+      spark.memory.storageFraction=0.3, \
+      spark.sql.adaptive.enabled=true, \
+      spark.sql.adaptive.coalescePartitions.enabled=true, \
+      spark.sql.adaptive.skewJoin.enabled=true, \
+      spark.dataproc.enhanced.optimizer.enabled=true, \
+      spark.dataproc.enhanced.execution.enabled=true, \
+      spark.network.timeout=300s, \
+      spark.executor.heartbeatInterval=60s, \
+      spark.speculation=true, \
+      spark.dataproc.enableNativeExecution=true, \
+      spark.dataproc.nativeExecution.jvmHeapSizeFraction=0.8, \
+      dataproc.gcsConnector.version=3.1.2, \
+      dataproc.sparkBqConnector.version=0.42.3, \
+      dataproc.profiling.enabled=true, \
+      dataproc.profiling.name=dingoserverless" \
     -- \
     --spark.driver.log.level=INFO

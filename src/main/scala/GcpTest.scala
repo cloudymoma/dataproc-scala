@@ -1,5 +1,5 @@
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SparkSession, SaveMode}
 import org.apache.spark.sql.functions._
 
 object GcpTest {
@@ -13,16 +13,35 @@ object GcpTest {
 
         import spark.implicits._
 
+        /*
         val fakeDataDF = spark.range(10) 
           .withColumn("uid", expr("uuid()")) 
           .withColumn("max_days", (rand() * 100 + 1).cast("int")) 
           .select("uid", "max_days") 
+          */
+
+        val sqlQuery = """
+          WITH generated_numbers AS (
+            SELECT explode(sequence(1, 1000000)) AS n
+          )
+          SELECT
+            uuid() AS uid,
+            CAST(floor(rand() * 100) + 1 AS INT) AS max_days
+          FROM generated_numbers
+          ORDER BY max_days desc
+          LIMIT 10
+        """
+        val fakeDataDF = spark.sql(sqlQuery)
 
         println("Generated data using the DataFrame API:")
         fakeDataDF.show()
         fakeDataDF.printSchema()
 
-		fakeDataDF.repartition(1).write.orc("gs://dingoproc/scala_output")
+		fakeDataDF
+          .repartition(1)
+          .write
+          .mode(SaveMode.Overwrite) 
+          .orc("gs://dingoproc/scala_output")
 
 		spark.stop()
 	}

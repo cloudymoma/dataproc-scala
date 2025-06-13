@@ -1,6 +1,6 @@
 name := "gcptest"
 version := "0.1.0"
-scalaVersion := "2.13.16" // Use a Scala version compatible with your Spark cluster
+scalaVersion := "2.12.20" // Use a Scala version compatible with your Spark cluster
 
 val sparkVersion = "3.5.6"
 

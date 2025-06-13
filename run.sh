@@ -13,7 +13,7 @@ export BATCH_ID="fake-data-generator-$(date +%Y%m%d-%H%M%S)"
 
 LOCAL_JAR_PATH=/usr/local/google/home/binwu/workspace/customers/yeahmobi/gcptest/target/scala-2.13/gcptest_2.13-0.1.0.jar
 # The GCS path to your JAR, defined in the previous step
-GCS_JAR_PATH="gs://dingoproc/jars/gcptest_2.13-0.1.0.jar"
+GCS_JAR_PATH="gs://dingoproc/jars/gcptest_2.12-0.1.0.jar"
 
 # The GCS bucket for staging dependencies and logs
 BUCKET_NAME="dingoproc"

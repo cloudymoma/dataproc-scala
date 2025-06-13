@@ -11,7 +11,7 @@ export TEMP_BUCKET=$GCS_BUCKET
 export JOB_CLUSTER_NAME=dingojob
 export MAX_IDLE=1h
 
-export GCS_JAR_PATH="gs://dingoproc/jars/gcptest_2.13-0.1.0.jar"
+export GCS_JAR_PATH="gs://dingoproc/jars/gcptest_2.12-0.1.0.jar"
 export OUTPUT_PATH="gs://dingoproc/scala_output"
 
 pwd=$(pwd)

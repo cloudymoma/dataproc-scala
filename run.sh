@@ -35,16 +35,21 @@ gcloud dataproc batches submit spark \
     --subnet=default \
     --version 2.3 \
     --history-server-cluster=$PHS_RESOURCE_NAME \
+    --autotuning-scenarios=auto \
     --properties \
       "spark.executor.cores=4, \
-      spark.executor.memory=16g, \
+      spark.executor.memory=25g, \
+      spark.executor.memoryOverhead=4g, \
       spark.executor.instances=2, \
-      spark.driver.cores=2, \
-      spark.driver.memory=8g, \
+      spark.driver.cores=4, \
+      spark.driver.memory=25g, \
+      spark.driver.memoryOverhead=4g, \
       spark.dynamicAllocation.enabled=true, \
       spark.dynamicAllocation.minExecutors=2, \
       spark.dynamicAllocation.maxExecutors=3, \
       spark.dynamicAllocation.executorAllocationRatio=1.0, \
+      spark.decommission.maxRatio=0.3, \
+      spark.reducer.fetchMigratedShuffle.enabled=true, \
       spark.shuffle.service.enabled=true, \
       spark.dataproc.scaling.version=2, \
       spark.dataproc.driver.compute.tier=premium, \
@@ -53,8 +58,8 @@ gcloud dataproc batches submit spark \
       spark.dataproc.executor.disk.tier=premium, \
       spark.default.parallelism=1000, \
       spark.sql.shuffle.partitions=1000, \
-      spark.memory.fraction=0.7, \
-      spark.memory.storageFraction=0.3, \
+      spark.memory.fraction=0.6, \
+      spark.memory.storageFraction=0.5, \
       spark.sql.adaptive.enabled=true, \
       spark.sql.adaptive.coalescePartitions.enabled=true, \
       spark.sql.adaptive.skewJoin.enabled=true, \

@@ -18,9 +18,8 @@ GCS_JAR_PATH="gs://dingoproc/jars/gcptest_2.13-0.1.0.jar"
 # The GCS bucket for staging dependencies and logs
 BUCKET_NAME="dingoproc"
 
-sbt clean package
-
-gcloud storage cp $LOCAL_JAR_PATH $GCS_JAR_PATH
+#sbt clean package
+#gcloud storage cp $LOCAL_JAR_PATH $GCS_JAR_PATH
 
 # --- The gcloud Command ---
 gcloud dataproc batches submit spark \

@@ -18,6 +18,9 @@ GCS_JAR_PATH="gs://dingoproc/jars/gcptest_2.12-0.1.0.jar"
 # The GCS bucket for staging dependencies and logs
 BUCKET_NAME="dingoproc"
 
+export PHS_CLUSTER_NAME="dingohist"
+export PHS_RESOURCE_NAME="projects/$PROJECT_ID/regions/$REGION/clusters/$PHS_CLUSTER_NAME"
+
 #sbt clean package
 #gcloud storage cp $LOCAL_JAR_PATH $GCS_JAR_PATH
 
@@ -31,6 +34,7 @@ gcloud dataproc batches submit spark \
     --deps-bucket=gs://$BUCKET_NAME/staging \
     --subnet=default \
     --version 2.3 \
+    --history-server-cluster=$PHS_RESOURCE_NAME \
     --properties \
       "spark.executor.cores=4, \
       spark.executor.memory=16g, \

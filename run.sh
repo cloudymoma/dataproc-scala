@@ -9,7 +9,7 @@ export PROJECT_ID=$(gcloud config get-value project)
 export REGION="us-central1" # Example: Changhua County, Taiwan
 
 # A unique name for this specific batch job run
-export BATCH_ID="fake-data-generator-$(date +%Y%m%d-%H%M%S)"
+export BATCH_ID="gcs-io-$(date +%Y%m%d-%H%M%S)"
 
 LOCAL_JAR_PATH=/usr/local/google/home/binwu/workspace/customers/yeahmobi/gcptest/target/scala-2.13/gcptest_2.13-0.1.0.jar
 # The GCS path to your JAR, defined in the previous step

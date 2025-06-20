@@ -12,6 +12,13 @@ object GcpTest {
 //		conf.set("spark.sql.hive.metastore.uris", "grpc://dataproc-metadata-hive-34c3cfdd-vdbq7vognq-uk.a.run.app:443")
 //		conf.set("spark.sql.hive.metastore.rpc", "grpc")
 //		conf.set("spark.sql.catalogImplementation", "hive")
+        conf.set(
+          "spark.hadoop.mapreduce.outputcommitter.factory.class",
+          "org.apache.hadoop.mapreduce.lib.output.DataprocFileOutputCommitterFactory")
+        // The Dataproc file output committer must set spark.hadoop.mapreduce.fileoutputcommitter.marksuccessfuljobs=false to avoid conflicts between success marker files created during concurrent writes.
+        conf.set(
+          "spark.hadoop.mapreduce.fileoutputcommitter.marksuccessfuljobs",
+          "false")
 		val spark = SparkSession.builder.config(conf).enableHiveSupport().getOrCreate()
 
         import spark.implicits._

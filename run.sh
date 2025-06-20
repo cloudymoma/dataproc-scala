@@ -55,7 +55,9 @@ gcloud dataproc batches submit spark \
       spark.dataproc.driver.compute.tier=premium, \
       spark.dataproc.executor.compute.tier=premium, \
       spark.dataproc.driver.disk.tier=premium, \
+      spark.dataproc.driver.disk.size=375g, \
       spark.dataproc.executor.disk.tier=premium, \
+      spark.dataproc.executor.disk.size=375g, \
       spark.default.parallelism=1000, \
       spark.sql.shuffle.partitions=1000, \
       spark.memory.fraction=0.6, \

@@ -46,7 +46,7 @@ gcloud dataproc batches submit spark \
       spark.driver.memoryOverhead=4g, \
       spark.dynamicAllocation.enabled=true, \
       spark.dynamicAllocation.minExecutors=2, \
-      spark.dynamicAllocation.maxExecutors=3, \
+      spark.dynamicAllocation.maxExecutors=10, \
       spark.dynamicAllocation.executorAllocationRatio=1.0, \
       spark.decommission.maxRatio=0.3, \
       spark.reducer.fetchMigratedShuffle.enabled=true, \

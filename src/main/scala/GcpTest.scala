@@ -8,7 +8,7 @@ import org.apache.spark.scheduler.{SparkListener, SparkListenerTaskEnd} // For l
 object GcpTest {
 
 	def run(Day: String): Unit ={
-		val conf = new SparkConf().setAppName("GrpcTest")
+		val conf = new SparkConf().setAppName("GCS FileIO Test")
 //		conf.set("spark.sql.hive.metastore.uris", "grpc://dataproc-metadata-hive-34c3cfdd-vdbq7vognq-uk.a.run.app:443")
 //		conf.set("spark.sql.hive.metastore.rpc", "grpc")
 //		conf.set("spark.sql.catalogImplementation", "hive")

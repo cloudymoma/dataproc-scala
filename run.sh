@@ -24,59 +24,137 @@ export PHS_RESOURCE_NAME="projects/$PROJECT_ID/regions/$REGION/clusters/$PHS_CLU
 #sbt clean package
 #gcloud storage cp $LOCAL_JAR_PATH $GCS_JAR_PATH
 
-      # spark.executor.instances=2, \ # this is for dynamicAllocation=false
-# --- The gcloud Command ---
-gcloud dataproc batches submit spark \
-    --project=$PROJECT_ID \
-    --region=$REGION \
-    --batch=$BATCH_ID \
-    --class=GcpTest \
-    --jars=$GCS_JAR_PATH \
-    --deps-bucket=gs://$BUCKET_NAME/staging \
-    --subnet=default \
-    --version 2.3 \
-    --history-server-cluster=$PHS_RESOURCE_NAME \
-    --autotuning-scenarios=auto \
-    --properties \
-      "spark.executor.cores=4, \
-      spark.executor.memory=25g, \
-      spark.executor.memoryOverhead=4g, \
-      spark.driver.cores=4, \
-      spark.driver.memory=25g, \
-      spark.driver.memoryOverhead=4g, \
-      spark.dynamicAllocation.enabled=true, \
-      spark.dynamicAllocation.initialExecutors=2, \
-      spark.dynamicAllocation.minExecutors=2, \
-      spark.dynamicAllocation.maxExecutors=10, \
-      spark.dynamicAllocation.executorAllocationRatio=1.0, \
-      spark.decommission.maxRatio=0.3, \
-      spark.reducer.fetchMigratedShuffle.enabled=true, \
-      spark.shuffle.service.enabled=true, \
-      spark.dataproc.scaling.version=2, \
-      spark.dataproc.driver.compute.tier=premium, \
-      spark.dataproc.executor.compute.tier=premium, \
-      spark.dataproc.driver.disk.tier=premium, \
-      spark.dataproc.driver.disk.size=375g, \
-      spark.dataproc.executor.disk.tier=premium, \
-      spark.dataproc.executor.disk.size=375g, \
-      spark.default.parallelism=1000, \
-      spark.sql.shuffle.partitions=1000, \
-      spark.memory.fraction=0.6, \
-      spark.memory.storageFraction=0.5, \
-      spark.sql.adaptive.enabled=true, \
-      spark.sql.adaptive.coalescePartitions.enabled=true, \
-      spark.sql.adaptive.skewJoin.enabled=true, \
-      spark.sql.shuffle.partitions=1000, \
-      spark.dataproc.enhanced.optimizer.enabled=true, \
-      spark.dataproc.enhanced.execution.enabled=true, \
-      spark.network.timeout=300s, \
-      spark.executor.heartbeatInterval=60s, \
-      spark.speculation=true, \
-      spark.dataproc.enableNativeExecution=true, \
-      spark.dataproc.nativeExecution.jvmHeapSizeFraction=0.8, \
-      dataproc.gcsConnector.version=3.1.2, \
-      dataproc.sparkBqConnector.version=0.42.3, \
-      dataproc.profiling.enabled=true, \
-      dataproc.profiling.name=dingoserverless" \
-    -- \
-    --spark.driver.log.level=INFO
+__run_serverless() {
+          # spark.executor.instances=2, \ # this is for dynamicAllocation=false
+    # --- The gcloud Command ---
+    gcloud dataproc batches submit spark \
+        --project=$PROJECT_ID \
+        --region=$REGION \
+        --batch=$BATCH_ID \
+        --class=GcpTest \
+        --jars=$GCS_JAR_PATH \
+        --deps-bucket=gs://$BUCKET_NAME/staging \
+        --subnet=default \
+        --version 2.3 \
+        --history-server-cluster=$PHS_RESOURCE_NAME \
+        --autotuning-scenarios=auto \
+        --properties \
+          "spark.executor.cores=4, \
+          spark.executor.memory=25g, \
+          spark.executor.memoryOverhead=4g, \
+          spark.driver.cores=4, \
+          spark.driver.memory=25g, \
+          spark.driver.memoryOverhead=4g, \
+          spark.dynamicAllocation.enabled=true, \
+          spark.dynamicAllocation.initialExecutors=2, \
+          spark.dynamicAllocation.minExecutors=2, \
+          spark.dynamicAllocation.maxExecutors=10, \
+          spark.dynamicAllocation.executorAllocationRatio=1.0, \
+          spark.decommission.maxRatio=0.3, \
+          spark.reducer.fetchMigratedShuffle.enabled=true, \
+          spark.shuffle.service.enabled=true, \
+          spark.dataproc.scaling.version=2, \
+          spark.dataproc.driver.compute.tier=premium, \
+          spark.dataproc.executor.compute.tier=premium, \
+          spark.dataproc.driver.disk.tier=premium, \
+          spark.dataproc.driver.disk.size=375g, \
+          spark.dataproc.executor.disk.tier=premium, \
+          spark.dataproc.executor.disk.size=375g, \
+          spark.default.parallelism=1000, \
+          spark.sql.shuffle.partitions=1000, \
+          spark.memory.fraction=0.6, \
+          spark.memory.storageFraction=0.5, \
+          spark.sql.adaptive.enabled=true, \
+          spark.sql.adaptive.coalescePartitions.enabled=true, \
+          spark.sql.adaptive.skewJoin.enabled=true, \
+          spark.dataproc.enhanced.optimizer.enabled=true, \
+          spark.dataproc.enhanced.execution.enabled=true, \
+          spark.network.timeout=300s, \
+          spark.executor.heartbeatInterval=60s, \
+          spark.speculation=true, \
+          dataproc.gcsConnector.version=3.1.2, \
+          dataproc.sparkBqConnector.version=0.42.3, \
+          dataproc.profiling.enabled=true, \
+          dataproc.profiling.name=dingoserverless" \
+        -- \
+        --spark.driver.log.level=INFO
+}
+
+# https://cloud.google.com/dataproc-serverless/docs/guides/native-query-execution#native_query_execution_properties
+__nqe() {
+        # spark.memory.offHeap.enabled=true
+    gcloud dataproc batches submit spark \
+        --project=$PROJECT_ID \
+        --region=$REGION \
+        --batch=$BATCH_ID \
+        --class=GcpTest \
+        --jars=$GCS_JAR_PATH \
+        --deps-bucket=gs://$BUCKET_NAME/staging \
+        --subnet=default \
+        --version 2.3 \
+        --history-server-cluster=$PHS_RESOURCE_NAME \
+        --autotuning-scenarios=auto \
+        --properties \
+          "spark.executor.cores=4, \
+          spark.executor.memory=5g, \
+          spark.executor.memoryOverhead=4g, \
+          spark.memory.offHeap.size=20g, \
+          spark.driver.cores=4, \
+          spark.driver.memory=25g, \
+          spark.driver.memoryOverhead=4g, \
+          spark.dynamicAllocation.enabled=true, \
+          spark.dynamicAllocation.initialExecutors=2, \
+          spark.dynamicAllocation.minExecutors=2, \
+          spark.dynamicAllocation.maxExecutors=10, \
+          spark.dynamicAllocation.executorAllocationRatio=1.0, \
+          spark.decommission.maxRatio=0.3, \
+          spark.reducer.fetchMigratedShuffle.enabled=true, \
+          spark.shuffle.service.enabled=true, \
+          spark.dataproc.scaling.version=2, \
+          spark.dataproc.driver.compute.tier=premium, \
+          spark.dataproc.executor.compute.tier=premium, \
+          spark.dataproc.driver.disk.tier=premium, \
+          spark.dataproc.driver.disk.size=375g, \
+          spark.dataproc.executor.disk.tier=premium, \
+          spark.dataproc.executor.disk.size=375g, \
+          spark.default.parallelism=1000, \
+          spark.sql.shuffle.partitions=1000, \
+          spark.memory.fraction=0.6, \
+          spark.memory.storageFraction=0.5, \
+          spark.sql.adaptive.enabled=true, \
+          spark.sql.adaptive.coalescePartitions.enabled=true, \
+          spark.sql.adaptive.skewJoin.enabled=true, \
+          spark.dataproc.enhanced.optimizer.enabled=true, \
+          spark.dataproc.enhanced.execution.enabled=true, \
+          spark.network.timeout=300s, \
+          spark.executor.heartbeatInterval=60s, \
+          spark.speculation=true, \
+          dataproc.gcsConnector.version=3.1.2, \
+          dataproc.sparkBqConnector.version=0.42.3, \
+          dataproc.profiling.enabled=true, \
+          dataproc.profiling.name=dingoserverless, \
+          spark.dataproc.runtimeEngine=native" \
+        -- \
+        --spark.driver.log.level=INFO
+}
+
+__main() {
+    if [ $# -eq 0 ]
+    then
+        __run_serverless
+    else
+        case $1 in
+            serverless)
+                __run_serverless
+                ;;
+            nqe)
+                __nqe
+                ;;
+            *)
+                __run_serverless
+                ;;
+        esac
+    fi
+}
+
+__main $@

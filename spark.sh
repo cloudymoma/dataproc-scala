@@ -16,6 +16,8 @@ export OUTPUT_PATH="gs://dingoproc/scala_output"
 
 pwd=$(pwd)
 
+export IMG_VERSION=2.3-debian12
+
 __usage() {
     echo "Usage: ./spark.sh {histserver,jobserver,job}"
 }
@@ -24,6 +26,7 @@ __hist_server() {
     gcloud dataproc clusters create $PHS_CLUSTER_NAME \
         --enable-component-gateway \
         --region=${REGION} --zone=$ZONE \
+        --image-version=${IMG_VERSION} \
         --single-node \
         --master-machine-type=n4-standard-4 \
         --master-boot-disk-size=128GB \
@@ -50,6 +53,7 @@ __job_server() {
     gcloud dataproc clusters create $JOB_CLUSTER_NAME \
         --enable-component-gateway \
         --region=$REGION --zone=$ZONE \
+        --image-version=${IMG_VERSION} \
         --max-idle=$MAX_IDLE \
         --bucket=$STAGING_BUCKET \
         --temp-bucket=$TEMP_BUCKET \

@@ -24,6 +24,7 @@ export PHS_RESOURCE_NAME="projects/$PROJECT_ID/regions/$REGION/clusters/$PHS_CLU
 #sbt clean package
 #gcloud storage cp $LOCAL_JAR_PATH $GCS_JAR_PATH
 
+      # spark.executor.instances=2, \ # this is for dynamicAllocation=false
 # --- The gcloud Command ---
 gcloud dataproc batches submit spark \
     --project=$PROJECT_ID \
@@ -40,11 +41,11 @@ gcloud dataproc batches submit spark \
       "spark.executor.cores=4, \
       spark.executor.memory=25g, \
       spark.executor.memoryOverhead=4g, \
-      spark.executor.instances=2, \
       spark.driver.cores=4, \
       spark.driver.memory=25g, \
       spark.driver.memoryOverhead=4g, \
       spark.dynamicAllocation.enabled=true, \
+      spark.dynamicAllocation.initialExecutors=2, \
       spark.dynamicAllocation.minExecutors=2, \
       spark.dynamicAllocation.maxExecutors=10, \
       spark.dynamicAllocation.executorAllocationRatio=1.0, \
@@ -65,6 +66,7 @@ gcloud dataproc batches submit spark \
       spark.sql.adaptive.enabled=true, \
       spark.sql.adaptive.coalescePartitions.enabled=true, \
       spark.sql.adaptive.skewJoin.enabled=true, \
+      spark.sql.shuffle.partitions=1000, \
       spark.dataproc.enhanced.optimizer.enabled=true, \
       spark.dataproc.enhanced.execution.enabled=true, \
       spark.network.timeout=300s, \

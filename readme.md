@@ -13,3 +13,7 @@ a [PHS](https://cloud.google.com/dataproc/docs/concepts/jobs/history-server)
 `make run` - run job on ephemeral job serser
 
 `make run_serverless` - run batch job in dataproc serverless mode
+
+`make run_nqe` - run batch job in dataproc serverless mode but native query
+engine for boosted performance. run the qualification tool against the spark
+event logs dir to check the compatibilities of your jobs `make qualify`.

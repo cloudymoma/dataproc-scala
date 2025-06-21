@@ -50,7 +50,7 @@ __run_serverless() {
           spark.dynamicAllocation.enabled=true, \
           spark.dynamicAllocation.initialExecutors=2, \
           spark.dynamicAllocation.minExecutors=2, \
-          spark.dynamicAllocation.maxExecutors=10, \
+          spark.dynamicAllocation.maxExecutors=100, \
           spark.dynamicAllocation.executorAllocationRatio=1.0, \
           spark.decommission.maxRatio=0.3, \
           spark.reducer.fetchMigratedShuffle.enabled=true, \
@@ -102,7 +102,7 @@ __nqe() {
           spark.dynamicAllocation.enabled=true, \
           spark.dynamicAllocation.initialExecutors=2, \
           spark.dynamicAllocation.minExecutors=2, \
-          spark.dynamicAllocation.maxExecutors=10, \
+          spark.dynamicAllocation.maxExecutors=100, \
           spark.dynamicAllocation.executorAllocationRatio=1.0, \
           spark.decommission.maxRatio=0.3, \
           spark.reducer.fetchMigratedShuffle.enabled=true, \

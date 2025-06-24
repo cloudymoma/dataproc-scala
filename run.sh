@@ -14,6 +14,7 @@ export BATCH_ID="gcs-io-$(date +%Y%m%d-%H%M%S)"
 # LOCAL_JAR_PATH=/usr/local/google/home/binwu/workspace/customers/yeahmobi/gcptest/target/scala-2.13/gcptest_2.13-0.1.0.jar
 # The GCS path to your JAR, defined in the previous step
 GCS_JAR_PATH="gs://dingoproc/jars/gcptest_2.12-0.1.0.jar"
+GCS_FATJAR_PATH="gs://dingoproc/jars/gcptest-assembly-0.1.0.jar"
 
 # The GCS bucket for staging dependencies and logs
 BUCKET_NAME="dingoproc"
@@ -23,9 +24,6 @@ export PHS_RESOURCE_NAME="projects/$PROJECT_ID/regions/$REGION/clusters/$PHS_CLU
 
 export RUNTIME=1.2
 
-#sbt clean package
-#gcloud storage cp $LOCAL_JAR_PATH $GCS_JAR_PATH
-
 __run_serverless() {
           # spark.executor.instances=2, \ # this is for dynamicAllocation=false
     # --- The gcloud Command ---
@@ -34,7 +32,7 @@ __run_serverless() {
         --region=$REGION \
         --batch=$BATCH_ID \
         --class=GcpTest \
-        --jars=$GCS_JAR_PATH \
+        --jars=$GCS_FATJAR_PATH \
         --deps-bucket=gs://$BUCKET_NAME/staging \
         --subnet=default \
         --version $RUNTIME \
@@ -85,7 +83,7 @@ __nqe() {
         --region=$REGION \
         --batch=$BATCH_ID \
         --class=GcpTest \
-        --jars=$GCS_JAR_PATH \
+        --jars=$GCS_FATJAR_PATH \
         --deps-bucket=gs://$BUCKET_NAME/staging \
         --subnet=default \
         --version $RUNTIME \

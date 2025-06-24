@@ -1,6 +1,7 @@
 target
 *.class
-project
+project/project
+project/target
 
 perfboost-output
 qualification-tool

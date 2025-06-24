@@ -12,6 +12,7 @@ export JOB_CLUSTER_NAME=dingojob
 export MAX_IDLE=1h
 
 export GCS_JAR_PATH="gs://dingoproc/jars/gcptest_2.12-0.1.0.jar"
+export GCS_FATJAR_PATH="gs://dingoproc/jars/gcptest-assembly-0.1.0.jar"
 export OUTPUT_PATH="gs://dingoproc/scala_output"
 
 pwd=$(pwd)
@@ -95,7 +96,7 @@ __job() {
         --region=$REGION \
         --cluster=$JOB_CLUSTER_NAME \
         --class=GcpTest \
-        --jars=$GCS_JAR_PATH \
+        --jars=$GCS_FATJAR_PATH \
         -- \
         $OUTPUT_PATH
 }

@@ -198,8 +198,31 @@ object GcpTest {
       case e: Exception => println(s"Could not retrieve disk information: ${e.getMessage}")
     }
   }
+  
+  def isFioInstalled(): Boolean = {
+    try {
+      // Suppress output by redirecting to /dev/null
+      Seq("bash", "-c", "command -v fio &> /dev/null").! == 0
+    } catch {
+      case _: Exception => false
+    }
+  }
 
   def testDiskIo(): Unit = {
+    if (!isFioInstalled()) {
+      println("Warning: 'fio' command not found. Skipping disk I/O benchmark.")
+      println("To run this benchmark, please install 'fio' (e.g., `sudo apt-get install fio` or `sudo yum install fio`).")
+      return
+    }
+
+    println("\n--- Fio Help Output ---")
+    try {
+      val helpResult = "fio --help".!!
+      println(helpResult)
+    } catch {
+      case e: Exception => println(s"Could not run 'fio --help': ${e.getMessage}")
+    }
+
     val testDir = "/tmp/spark-io-test"
     s"mkdir -p $testDir".!
 

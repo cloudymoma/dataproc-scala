@@ -58,6 +58,8 @@ I have copied to GCS and load into my spark job at runtime
 gcloud storage cp fio gs://dingoproc/fio_linux_x86
 ```
 
+[download to spark worker](https://github.com/cloudymoma/dataproc-scala/blob/main/src/main/scala/GcpTest.scala#L271-L289)
+
 #### fio cheatsheet
 
  Read Test

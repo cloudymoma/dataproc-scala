@@ -29,10 +29,13 @@ jobserver:
 run:
 	$(pwd)/spark.sh job
 
+run_serverless_std: 
+	$(pwd)/run.sh serverless-standard
+
 qualify:
 	$(pwd)/run_qualification_tool.sh -f $(GCS_SPARK_LOG_DIR) \
 		-k $(SERVICE_ACC) \
 		-x 32g -t 16 \
 		-o perfboost-output
 
-.PHONY: build run_serverless run_nqe run histserver jobserver qualify
+.PHONY: build run_serverless run_nqe run histserver jobserver qualify run_serverless_std

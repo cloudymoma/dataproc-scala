@@ -128,6 +128,57 @@ __nqe() {
         --spark.driver.log.level=INFO
 }
 
+__run_serverless_standard() {
+          # spark.executor.instances=2, \ # this is for dynamicAllocation=false
+    # --- The gcloud Command ---
+    gcloud dataproc batches submit spark \
+        --project=$PROJECT_ID \
+        --region=$REGION \
+        --batch=$BATCH_ID \
+        --class=GcpTest \
+        --jars=$GCS_FATJAR_PATH \
+        --deps-bucket=gs://$BUCKET_NAME/staging \
+        --subnet=default \
+        --version $RUNTIME \
+        --history-server-cluster=$PHS_RESOURCE_NAME \
+        --autotuning-scenarios=auto \
+        --properties \
+          "spark.executor.cores=4, \
+          spark.executor.memory=25g, \
+          spark.executor.memoryOverhead=4g, \
+          spark.driver.cores=4, \
+          spark.driver.memory=25g, \
+          spark.driver.memoryOverhead=4g, \
+          spark.dynamicAllocation.enabled=true, \
+          spark.dynamicAllocation.initialExecutors=2, \
+          spark.dynamicAllocation.minExecutors=2, \
+          spark.dynamicAllocation.maxExecutors=100, \
+          spark.dynamicAllocation.executorAllocationRatio=1.0, \
+          spark.decommission.maxRatio=0.3, \
+          spark.reducer.fetchMigratedShuffle.enabled=true, \
+          spark.dataproc.scaling.version=2, \
+          spark.dataproc.driver.compute.tier=standard, \
+          spark.dataproc.executor.compute.tier=standard, \
+          spark.dataproc.driver.disk.tier=standard, \
+          spark.dataproc.driver.disk.size=500g, \
+          spark.dataproc.executor.disk.tier=standard, \
+          spark.dataproc.executor.disk.size=500g, \
+          spark.sql.adaptive.enabled=true, \
+          spark.sql.adaptive.coalescePartitions.enabled=true, \
+          spark.sql.adaptive.skewJoin.enabled=true, \
+          spark.dataproc.enhanced.optimizer.enabled=true, \
+          spark.dataproc.enhanced.execution.enabled=true, \
+          spark.network.timeout=300s, \
+          spark.executor.heartbeatInterval=60s, \
+          spark.speculation=true, \
+          dataproc.gcsConnector.version=3.1.2, \
+          dataproc.sparkBqConnector.version=0.42.3, \
+          dataproc.profiling.enabled=true, \
+          dataproc.profiling.name=dingoserverless" \
+        -- \
+        --spark.driver.log.level=INFO
+}
+
 __main() {
     if [ $# -eq 0 ]
     then
@@ -139,6 +190,9 @@ __main() {
                 ;;
             nqe)
                 __nqe
+                ;;
+            serverless-standard)
+                __run_serverless_standard
                 ;;
             *)
                 __run_serverless

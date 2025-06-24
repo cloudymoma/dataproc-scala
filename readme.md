@@ -18,8 +18,47 @@ a [PHS](https://cloud.google.com/dataproc/docs/concepts/jobs/history-server)
 engine for boosted performance. run the qualification tool against the spark
 event logs dir to check the compatibilities of your jobs `make qualify`.
 
-#### fio cheatsheet
+### build `fio` from sourcer
 
+```shell
+git clone https://github.com/axboe/fio.git
+cd fio
+
+./configure --build-static
+make
+```
+
+In some virtualized or emulated environments, such as QEMU, default compiler optimizations might cause issues. If you encounter unexpected behavior with your static build, you can try disabling optimizations during the configuration step:
+
+```shell
+./configure --build-static --disable-optimizations
+```
+
+Or a minimal configuration for a general-purpose, lightweight fio binary is:
+
+```shell
+./configure --build-static \
+    --disable-numa \
+    --disable-rdma \
+    --disable-gfapi \
+    --disable-libhdfs \
+    --disable-pmem \
+    --disable-gfio \
+    --disable-libiscsi \
+    --disable-rados \
+    --disable-rbd \
+    --disable-zlib
+```
+
+anyway, after `make`, you should see `fio` binary right in your project/current folder.
+
+I have copied to GCS and load into my spark job at runtime
+
+```
+gcloud storage cp fio gs://dingoproc/fio_linux_x86
+```
+
+#### fio cheatsheet
 
  Read Test
  ```

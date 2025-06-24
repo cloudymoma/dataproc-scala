@@ -114,6 +114,11 @@ object GcpTest {
         computePrimes(spark)
 
         println("\n==================================================")
+        println("      GCS File Download")
+        println("==================================================")
+        downloadGcsFile()
+
+        println("\n==================================================")
         println("      Disk Information and I/O Benchmark")
         println("==================================================")
         printDiskInfo()
@@ -209,15 +214,17 @@ object GcpTest {
   }
 
   def testDiskIo(): Unit = {
+    /*
     if (!isFioInstalled()) {
       println("Warning: 'fio' command not found. Skipping disk I/O benchmark.")
       println("To run this benchmark, please install 'fio' (e.g., `sudo apt-get install fio` or `sudo yum install fio`).")
       return
     }
+    */
 
     println("\n--- Fio Help Output ---")
     try {
-      val helpResult = "fio --help".!!
+      val helpResult = "/tmp/fio --help".!!
       println(helpResult)
     } catch {
       case e: Exception => println(s"Could not run 'fio --help': ${e.getMessage}")
@@ -228,7 +235,7 @@ object GcpTest {
 
     println("\n--- Testing Disk Throughput (1G Sequential Write) ---")
     try {
-      val throughputCmd = s"fio --name=throughput-test --directory=$testDir --size=1G --rw=write --bs=1M --direct=1 --numjobs=1 --group_reporting --output-format=json"
+      val throughputCmd = s"/tmp/fio --name=throughput-test --directory=$testDir --size=1G --rw=write --bs=1M --direct=1 --numjobs=1 --group_reporting --output-format=json"
       val throughputResult = throughputCmd.!!
       val parsedThroughput = parse(throughputResult)
       
@@ -246,7 +253,7 @@ object GcpTest {
 
     println("\n--- Testing Disk IOPS (1G Random Write) ---")
     try {
-      val iopsCmd = s"fio --name=iops-test --directory=$testDir --size=1G --rw=randwrite --bs=4k --direct=1 --numjobs=1 --group_reporting --output-format=json"
+      val iopsCmd = s"/tmp/fio --name=iops-test --directory=$testDir --size=1G --rw=randwrite --bs=4k --direct=1 --numjobs=1 --group_reporting --output-format=json"
       val iopsResult = iopsCmd.!!
       val parsedIops = parse(iopsResult)
       
@@ -258,6 +265,26 @@ object GcpTest {
       case e: Exception => println(s"IOPS test failed: ${e.getMessage}. Make sure 'fio' is installed.")
     } finally {
       s"rm -rf $testDir".!
+    }
+  }
+
+  def downloadGcsFile(): Unit = {
+    val gcsPath = "gs://dingoproc/fio_linux_x86"
+    val localPath = "/tmp/fio"
+    println(s"Downloading $gcsPath to $localPath")
+    try {
+      val command = s"gsutil cp $gcsPath $localPath"
+      val result = command.!
+      if (result == 0) {
+        println("File downloaded successfully.")
+        // Make the file executable
+        s"chmod +x $localPath".!
+        println(s"Made $localPath executable.")
+      } else {
+        println(s"Error downloading file. gsutil exit code: $result")
+      }
+    } catch {
+      case e: Exception => println(s"An exception occurred during download: ${e.getMessage}")
     }
   }
 

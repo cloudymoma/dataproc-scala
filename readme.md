@@ -18,7 +18,7 @@ a [PHS](https://cloud.google.com/dataproc/docs/concepts/jobs/history-server)
 engine for boosted performance. run the qualification tool against the spark
 event logs dir to check the compatibilities of your jobs `make qualify`.
 
-### build `fio` from sourcer
+### build `fio` from source
 
 ```shell
 git clone https://github.com/axboe/fio.git

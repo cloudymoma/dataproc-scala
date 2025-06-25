@@ -10,13 +10,18 @@ a [PHS](https://cloud.google.com/dataproc/docs/concepts/jobs/history-server)
 
 `make build` - build the job scala source code
 
-`make run` - run job on ephemeral job serser
+`make run` - run job on ephemeral job serser (highly customizable)
 
-`make run_serverless` - run batch job in dataproc serverless mode
+`make run_serverless` - run batch job in dataproc serverless premium mode (N2
++ LocalSSD shuffle)
+
+`make run_serverless_std` - run batch job in dataproc serverless standard mode
+(E2 + pd-standard shuffle)
 
 `make run_nqe` - run batch job in dataproc serverless mode but native query
 engine for boosted performance. run the qualification tool against the spark
-event logs dir to check the compatibilities of your jobs `make qualify`.
+event logs dir to check the compatibilities of your jobs `make qualify`. (N2
++ LocalSSD shuffle + native execution engine)
 
 ### build `fio` from source
 

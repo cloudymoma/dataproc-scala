@@ -122,7 +122,8 @@ object GcpTest {
         println("      Disk Information and I/O Benchmark")
         println("==================================================")
         printDiskInfo()
-        testDiskIo()
+        testDiskIo("/tmp/spark-io-test")
+        testDiskIo("/mnt/1/tmp/spark-io-test")
 
 		spark.stop()
 	}
@@ -199,6 +200,9 @@ object GcpTest {
         val mountpoint = (device \ "mountpoint").extractOpt[String].getOrElse("N/A")
         println(f"  Device: $name%-10s Size: $size%-10s Mountpoint: $mountpoint")
       }
+
+      val rawResult = "lsblk".!!
+      println(rawResult)
     } catch {
       case e: Exception => println(s"Could not retrieve disk information: ${e.getMessage}")
     }
@@ -213,7 +217,7 @@ object GcpTest {
     }
   }
 
-  def testDiskIo(): Unit = {
+  def testDiskIo(testDir: String): Unit = {
     /*
     if (!isFioInstalled()) {
       println("Warning: 'fio' command not found. Skipping disk I/O benchmark.")
@@ -222,6 +226,7 @@ object GcpTest {
     }
     */
 
+    /*
     println("\n--- Fio Help Output ---")
     try {
       val helpResult = "/tmp/fio --help".!!
@@ -229,9 +234,10 @@ object GcpTest {
     } catch {
       case e: Exception => println(s"Could not run 'fio --help': ${e.getMessage}")
     }
+    */
 
-    val testDir = "/tmp/spark-io-test"
     s"mkdir -p $testDir".!
+    println(s"=========== Using test directory: $testDir")
 
     println("\n--- Testing Disk Throughput (1G Sequential Write) ---")
     try {

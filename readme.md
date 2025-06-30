@@ -21,7 +21,7 @@ a [PHS](https://cloud.google.com/dataproc/docs/concepts/jobs/history-server)
 engine for boosted performance. run the qualification tool against the spark
 event logs dir to check the compatibilities of your jobs `make qualify`. (N2 + LocalSSD shuffle + native execution engine)
 
-Run [Spark Servlerless](https://cloud.google.com/products/serverless-spark?e=48754805&hl=en) in [BigQuery](https://cloud.google.com/bigquery) as a stored procedure, click [here](https://github.com/cloudymoma/gcp-playgroud-public/blob/master/BigQuery/bq_spark.md)
+Run [Spark Servlerless](https://cloud.google.com/products/serverless-spark) in [BigQuery](https://cloud.google.com/bigquery) as a stored procedure, click [here](https://github.com/cloudymoma/gcp-playgroud-public/blob/master/BigQuery/bq_spark.md)
 
 ### build `fio` from source
 

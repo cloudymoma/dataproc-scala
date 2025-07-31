@@ -50,7 +50,7 @@ fi
 FILE_PATH=""
 KEY_PATH=""
 OUTPUT_PATH="./output"  # Default output path is current directory/output
-VERSION="1.2.1"  # Default version, now configurable
+VERSION="1.3.1"  # Default version, now configurable
 JAR_NAME="dataproc-perfboost-qualification-${VERSION}.jar"
 JAR_URL="https://storage.googleapis.com/qualification-tool/${JAR_NAME}"
 

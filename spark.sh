@@ -10,6 +10,7 @@ export TEMP_BUCKET=$GCS_BUCKET
 
 export JOB_CLUSTER_NAME=dingojob
 export MAX_IDLE=1h
+export DATAPROC_TIER=premium # standard
 
 export GCS_JAR_PATH="gs://dingoproc/jars/gcptest_2.12-0.1.0.jar"
 export GCS_FATJAR_PATH="gs://dingoproc/jars/gcptest-assembly-0.1.0.jar"
@@ -58,6 +59,7 @@ __job_server() {
         --max-idle=$MAX_IDLE \
         --bucket=$STAGING_BUCKET \
         --temp-bucket=$TEMP_BUCKET \
+        --tier=$DATAPROC_TIER \
         --master-machine-type=n2d-standard-2 \
         --num-masters=1 \
         --master-boot-disk-size=128GB \

@@ -1,9 +1,9 @@
 pwd := $(shell pwd)
 
-LOCAL_JAR_PATH := /usr/local/google/home/binwu/workspace/customers/yeahmobi/gcptest/target/scala-2.12/gcptest_2.12-0.1.0.jar
+LOCAL_JAR_PATH := $(pwd)/target/scala-2.12/gcptest_2.12-0.1.0.jar
 GCS_JAR_PATH := gs://dingoproc/jars/gcptest_2.12-0.1.0.jar
 
-LOCAL_FATJAR_PATH := /usr/local/google/home/binwu/workspace/customers/yeahmobi/gcptest/target/scala-2.12/gcptest-assembly-0.1.0.jar
+LOCAL_FATJAR_PATH := $(pwd)/target/scala-2.12/gcptest-assembly-0.1.0.jar
 GCS_FATJAR_PATH := gs://dingoproc/jars/gcptest-assembly-0.1.0.jar
 
 GCS_SPARK_LOG_DIR := gs://dingoproc/events/spark-job-history

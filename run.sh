@@ -11,7 +11,6 @@ export REGION="us-central1" # Example: Changhua County, Taiwan
 # A unique name for this specific batch job run
 export BATCH_ID="gcs-io-$(date +%Y%m%d-%H%M%S)"
 
-# LOCAL_JAR_PATH=/usr/local/google/home/binwu/workspace/customers/yeahmobi/gcptest/target/scala-2.13/gcptest_2.13-0.1.0.jar
 # The GCS path to your JAR, defined in the previous step
 GCS_JAR_PATH="gs://dingoproc/jars/gcptest_2.12-0.1.0.jar"
 GCS_FATJAR_PATH="gs://dingoproc/jars/gcptest-assembly-0.1.0.jar"

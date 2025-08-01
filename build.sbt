@@ -8,7 +8,8 @@ val sparkVersion = "3.5.6"
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % sparkVersion % "provided",
   "org.apache.spark" %% "spark-sql"  % sparkVersion % "provided",
-  "org.json4s" %% "json4s-native" % "4.0.7"
+  "org.json4s" %% "json4s-native" % "4.0.7",
+  "com.google.cloud.bigdataoss" % "gcs-connector" % "hadoop3-2.2.20" % "provided"
 )
 
 assembly / assemblyShadeRules := Seq(

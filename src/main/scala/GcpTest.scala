@@ -15,6 +15,8 @@ object GcpTest {
 
 	def run(Day: String): Unit ={
 		val conf = new SparkConf().setAppName("GCS FileIO Test")
+        conf.set("spark.hadoop.fs.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem")
+        conf.set("spark.hadoop.fs.AbstractFileSystem.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS")
 //		conf.set("spark.sql.hive.metastore.uris", "grpc://dataproc-metadata-hive-34c3cfdd-vdbq7vognq-uk.a.run.app:443")
 //		conf.set("spark.sql.hive.metastore.rpc", "grpc")
 //		conf.set("spark.sql.catalogImplementation", "hive")
@@ -124,6 +126,11 @@ object GcpTest {
         printDiskInfo()
         testDiskIo("/tmp/spark-io-test") // PD
         testDiskIo("/mnt/1/tmp/spark-io-test") // LocalSSD
+
+        println("\n==================================================")
+        println("      GCS IOPS Read Test")
+        println("==================================================")
+        gcsIopsTest(spark)
 
 		spark.stop()
 	}
@@ -274,13 +281,93 @@ object GcpTest {
     }
   }
 
+  def gcsIopsTest(spark: SparkSession): Unit = {
+    import spark.implicits._
+    import org.apache.hadoop.fs.{FileSystem, Path}
+    import scala.collection.mutable.ListBuffer
+
+    println("Starting GCS IOPS test...")
+    val bucketPath = "gs://dingoproc"
+    val path = new Path(bucketPath)
+    val fs = path.getFileSystem(spark.sparkContext.hadoopConfiguration)
+
+    println(s"Listing files in $bucketPath recursively...")
+    val fileStatuses = ListBuffer[(String, Long)]()
+    try {
+      val remoteIterator = fs.listFiles(path, true) // true for recursive
+      while (remoteIterator.hasNext) {
+        val status = remoteIterator.next()
+        if (status.isFile) {
+          fileStatuses += ((status.getPath.toString, status.getLen))
+        }
+      }
+    } catch {
+      case e: Exception =>
+        println(s"Error listing files in GCS: ${e.getMessage}")
+        return
+    }
+
+    val sixtyFourMB = 64 * 1024 * 1024
+    val smallFiles = fileStatuses
+      .filter { case (_, size) => size < sixtyFourMB && size > 0 }
+      .sortBy { case (_, size) => size }
+      .map { case (path, _) => path }
+      .toList
+
+    if (smallFiles.isEmpty) {
+      println(s"No files smaller than 64MB found in $bucketPath. Skipping IOPS test.")
+      return
+    }
+
+    println(s"Found ${smallFiles.size} files smaller than 64MB. Starting 1-minute read test.")
+
+    var totalFilesRead = 0L
+    var totalBytesRead = 0L
+    val startTime = System.nanoTime()
+    val testDurationNanos = 60 * 1000000000L // 1 minute
+
+    val filePathsForDf = smallFiles.toDF("path")
+    filePathsForDf.cache() // Cache the list of paths
+
+    while (System.nanoTime() - startTime < testDurationNanos) {
+      // The paths are loaded from the cached DataFrame of strings
+      val df = spark.read.format("binaryFile").load(filePathsForDf.as[String].collect(): _*)
+      
+      // Trigger action and collect stats
+      val stats = df.select(sum("length"), count("*")).first()
+      val bytesThisIteration = Option(stats.get(0)).map(_.asInstanceOf[Long]).getOrElse(0L)
+      val filesThisIteration = Option(stats.get(1)).map(_.asInstanceOf[Long]).getOrElse(0L)
+      
+      if (filesThisIteration > 0) {
+        totalBytesRead += bytesThisIteration
+        totalFilesRead += filesThisIteration
+        println(s"Read $filesThisIteration files (${bytesThisIteration} bytes) in one loop.")
+      } else {
+        println("No files were read in this iteration, ending test to avoid infinite loop.")
+        // Break the loop if nothing is being read.
+        filePathsForDf.unpersist()
+        return
+      }
+    }
+
+    val actualDurationNanos = System.nanoTime() - startTime
+    val durationSeconds = actualDurationNanos / 1e9d
+
+    println("\n--- GCS IOPS Test Summary ---")
+    println(f"Test finished in $durationSeconds%.2f seconds.")
+    println(s"Total files read (including re-reads): $totalFilesRead")
+    println(s"Total bytes read (including re-reads): $totalBytesRead")
+    
+    filePathsForDf.unpersist()
+  }
+
   def downloadGcsFile(): Unit = {
     val gcsPath = "gs://dingoproc/fio_linux_x86"
     val localPath = "/tmp/fio"
     println(s"Downloading $gcsPath to $localPath")
     try {
       val command = s"gsutil cp $gcsPath $localPath"
-      val result = command.!
+      val result = command.! 
       if (result == 0) {
         println("File downloaded successfully.")
         // Make the file executable

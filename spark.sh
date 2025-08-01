@@ -19,6 +19,7 @@ export OUTPUT_PATH="gs://dingoproc/scala_output"
 pwd=$(pwd)
 
 export IMG_VERSION=2.3-debian12
+export JOB_SERVER_MACHINE_TYPE=c2d-standard-4
 
 __usage() {
     echo "Usage: ./spark.sh {histserver,jobserver,job}"
@@ -60,14 +61,14 @@ __job_server() {
         --bucket=$STAGING_BUCKET \
         --temp-bucket=$TEMP_BUCKET \
         --tier=$DATAPROC_TIER \
-        --master-machine-type=n2d-standard-2 \
+        --master-machine-type=$JOB_SERVER_MACHINE_TYPE \
         --num-masters=1 \
         --master-boot-disk-size=128GB \
         --master-boot-disk-type=pd-balanced \
         --num-master-local-ssds=1 \
         --master-local-ssd-interface=NVME \
         --autoscaling-policy=balanced-scaling-policy \
-        --worker-machine-type=n2d-standard-2 \
+        --worker-machine-type=$JOB_WORKER_MACHINE_TYPE \
         --num-workers=2 \
         --worker-boot-disk-size=500GB \
         --worker-boot-disk-type=pd-ssd \

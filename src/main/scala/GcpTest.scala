@@ -32,10 +32,10 @@ object GcpTest {
         // -------------------- Task 1 GCS write single file
 
         /*
-        val fakeDataDF = spark.range(10) 
-          .withColumn("uid", expr("uuid()")) 
-          .withColumn("max_days", (rand() * 100 + 1).cast("int")) 
-          .select("uid", "max_days") 
+        val fakeDataDF = spark.range(10)
+          .withColumn("uid", expr("uuid()"))
+          .withColumn("max_days", (rand() * 100 + 1).cast("int"))
+          .select("uid", "max_days")
           */
 
         val sqlQuery = """
@@ -76,11 +76,11 @@ object GcpTest {
         // Read data from GCS
         println(s"Reading data from $inputGcsPath")
         val gcsDataDF = spark.read.format("csv").option("header", "true").load(inputGcsPath)
-        
+
         gcsDataDF.cache() // Cache to ensure it's read
         val rowCount = gcsDataDF.count()
         println(s"Finished reading. Number of rows: $rowCount")
-        
+
         // Write data back to GCS
         println(s"Writing data to $outputGcsPath")
         gcsDataDF.write.mode(SaveMode.Overwrite).format("csv").option("header", "true").save(outputGcsPath)
@@ -91,7 +91,7 @@ object GcpTest {
 
         println(s"\n--- GCS Read/Write Task Metrics ---")
         println(f"Time taken: $durationSeconds%.2f seconds")
-        
+
         val logicalPlan = gcsDataDF.queryExecution.logical
         val stats = gcsDataDF.queryExecution.analyzed.stats
         val sizeInBytes = stats.sizeInBytes
@@ -122,8 +122,8 @@ object GcpTest {
         println("      Disk Information and I/O Benchmark")
         println("==================================================")
         printDiskInfo()
-        testDiskIo("/tmp/spark-io-test")
-        testDiskIo("/mnt/1/tmp/spark-io-test")
+        testDiskIo("/tmp/spark-io-test") // PD
+        testDiskIo("/mnt/1/tmp/spark-io-test") // LocalSSD
 
 		spark.stop()
 	}
@@ -207,7 +207,7 @@ object GcpTest {
       case e: Exception => println(s"Could not retrieve disk information: ${e.getMessage}")
     }
   }
-  
+
   def isFioInstalled(): Boolean = {
     try {
       // Suppress output by redirecting to /dev/null
@@ -244,7 +244,7 @@ object GcpTest {
       val throughputCmd = s"/tmp/fio --name=throughput-test --directory=$testDir --size=1G --rw=write --bs=1M --direct=1 --numjobs=1 --group_reporting --output-format=json"
       val throughputResult = throughputCmd.!!
       val parsedThroughput = parse(throughputResult)
-      
+
       val writeStats = (parsedThroughput \ "jobs")(0) \ "write"
       val throughput = (writeStats \ "bw").extract[Double]
       val unit = (writeStats \ "bw_bytes").extract[Long] match {
@@ -262,7 +262,7 @@ object GcpTest {
       val iopsCmd = s"/tmp/fio --name=iops-test --directory=$testDir --size=1G --rw=randwrite --bs=4k --direct=1 --numjobs=1 --group_reporting --output-format=json"
       val iopsResult = iopsCmd.!!
       val parsedIops = parse(iopsResult)
-      
+
       val writeStats = (parsedIops \ "jobs")(0) \ "write"
       val iops = (writeStats \ "iops").extract[Double]
       println(f"Average Write IOPS: $iops%.2f")

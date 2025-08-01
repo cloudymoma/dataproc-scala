@@ -1,4 +1,4 @@
-# ⚡ Spark on Dataproc
+# ⚡ Spark on Dataproc [中文](readme_cn.md)
 
 [![CI](https://github.com/cloudymoma/dataproc-scala/actions/workflows/ci.yml/badge.svg)](https://github.com/cloudymoma/dataproc-scala/actions/workflows/ci.yml)
 

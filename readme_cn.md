@@ -1,5 +1,7 @@
 # ⚡ Spark on Dataproc
 
+[![CI](https://github.com/cloudymoma/dataproc-scala/actions/workflows/ci.yml/badge.svg)](https://github.com/cloudymoma/dataproc-scala/actions/workflows/ci.yml)
+
 一个用于在 Google Cloud Dataproc 上运行 Apache Spark 作业的综合工具包，支持闪电引擎 (Lightning Engine) 和原生查询引擎 (Native Query Engine, NQE)。
 
 ## 📁 文件生成器（可选）

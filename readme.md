@@ -1,5 +1,7 @@
 # ⚡ Spark on Dataproc
 
+[![CI](https://github.com/cloudymoma/dataproc-scala/actions/workflows/ci.yml/badge.svg)](https://github.com/cloudymoma/dataproc-scala/actions/workflows/ci.yml)
+
 A comprehensive toolkit for running Apache Spark jobs on Google Cloud Dataproc with support for Lightning Engine and Native Query Engine (NQE).
 
 ## 📁 File Generator (optional)

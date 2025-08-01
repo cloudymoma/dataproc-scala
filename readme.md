@@ -1,23 +1,23 @@
-# Spark on Dataproc
+# ⚡ Spark on Dataproc
 
 A comprehensive toolkit for running Apache Spark jobs on Google Cloud Dataproc with support for Lightning Engine and Native Query Engine (NQE).
 
-## Quick Start
+## 📁 File Generator (optional)
 
-Use the [CSV file generator](https://github.com/cloudymoma/csv_data_generator) for optimal performance testing.
+Use the [CSV file generator](https://github.com/cloudymoma/csv_data_generator) for large file generation. [filegen.py](filegen.py) is a bit slow.
 
-## Make Commands
+## 🛠️ Make Commands
 
-### Infrastructure Setup
+### 🏗️ Infrastructure Setup
 - **`make histserver`** - Create a [Persistent History Server (PHS)](https://cloud.google.com/dataproc/docs/concepts/jobs/history-server)
 - **`make jobserver`** - Create an ephemeral job server with computing resource autoscaling, this is configurable through [autoscaling-policy.yml](autoscaling-policy.yml). Can be turned off.
 
-### Build and Run
+### 🔨 Build and Run
 - **`make build`** - Build the Scala source code
 - **`make run`** - Run job on ephemeral cluster (highly customizable)
   - Supports [Lightning Engine](https://cloud.google.com/blog/products/data-analytics/introducing-lightning-engine-for-apache-spark?e=48754805) and Native Query Engine
 
-### Serverless Execution
+### ☁️ Serverless Execution
 - **`make run_serverless`** - Run batch job in Dataproc Serverless **premium** mode
   - Uses N2 instances + LocalSSD shuffle
 - **`make run_serverless_std`** - Run batch job in Dataproc Serverless **standard** mode
@@ -26,12 +26,12 @@ Use the [CSV file generator](https://github.com/cloudymoma/csv_data_generator) f
   - Uses N2 + LocalSSD shuffle + native execution engine
   - Requires compatibility check with `make qualify`
 
-### Job Compatibility
-- **`make qualify`** - Run qualification tool against Spark event logs to check job compatibility
+### ✅ Job Compatibility
+- **`make qualify`** - Run qualification tool against Spark event logs to check job compatibility for **`NQE`**
 
-## Configuration
+## ⚙️ Configuration
 
-### Dataproc Cluster Tier Settings
+### 🎛️ Dataproc Cluster Tier Settings
 ```bash
 # Default tier (standard)
 export DATAPROC_TIER=standard
@@ -45,18 +45,18 @@ export ENABLE_NQE=true
 
 > **Note:** Native Query Engine is only available on Premium tier clusters.
 
-### Job Configuration
+### 📝 Job Configuration
 Manually adjust job configuration in [`spark.sh`](spark.sh) to fit your specific needs. When using NQE, always run the qualification tool first to ensure compatibility.
 
-## Additional Resources
+## 📚 Additional Resources
 
 - **BigQuery Integration:** Run [Spark Serverless](https://cloud.google.com/products/serverless-spark) in [BigQuery](https://cloud.google.com/bigquery) as a stored procedure - [Guide](https://github.com/cloudymoma/gcp-playgroud-public/blob/master/BigQuery/bq_spark.md)
 
-## FIO (Flexible I/O Tester) Integration
+## 🔬 FIO (Flexible I/O Tester) Integration
 
-### Building FIO from Source
+### 🔧 Building FIO from Source
 
-#### Basic Build
+#### 🏗️ Basic Build
 ```bash
 git clone https://github.com/axboe/fio.git
 cd fio
@@ -64,7 +64,7 @@ cd fio
 make
 ```
 
-#### Troubleshooting Builds
+#### 🔧 Troubleshooting Builds
 
 **For virtualized environments (QEMU):**
 ```bash
@@ -88,16 +88,16 @@ make
 
 After running `make`, the `fio` binary will be available in your project directory.
 
-#### Deployment to GCS
+#### 🚀 Deployment to GCS
 ```bash
 gcloud storage cp fio gs://dingoproc/fio_linux_x86
 ```
 
 See [GcpTest.scala#L277-L295](https://github.com/cloudymoma/dataproc-scala/blob/main/src/main/scala/GcpTest.scala#L277-L295) for runtime download to Spark workers.
 
-### FIO Performance Testing Cheat Sheet
+### 📊 FIO Performance Testing Cheat Sheet
 
-#### Basic Tests
+#### 🔨 Basic Tests
 
 **Random Read Test**
 ```bash
@@ -114,7 +114,7 @@ fio --name=randwrite --ioengine=libaio --iodepth=1 --rw=randwrite --bs=4k --dire
 fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=test --filename=random_read_write.fio --bs=4k --iodepth=64 --size=4G --readwrite=randrw --rwmixread=75
 ```
 
-#### Sequential Performance Tests
+#### ⏩ Sequential Performance Tests
 
 **Sequential Reads** (8K blocks, Direct I/O)
 ```bash
@@ -126,7 +126,7 @@ fio --name=seqread --rw=read --direct=1 --ioengine=libaio --bs=8k --numjobs=8 --
 fio --name=seqwrite --rw=write --direct=1 --ioengine=libaio --bs=32k --numjobs=4 --size=2G --runtime=600 --group_reporting
 ```
 
-#### Random Performance Tests
+#### 🎲 Random Performance Tests
 
 **Random Reads** (8K blocks, Direct I/O)
 ```bash
@@ -143,7 +143,7 @@ fio --name=randwrite --rw=randwrite --direct=1 --ioengine=libaio --bs=64k --numj
 fio --name=randrw --rw=randrw --direct=1 --ioengine=libaio --bs=16k --numjobs=8 --rwmixread=90 --size=1G --runtime=600 --group_reporting
 ```
 
-#### Advanced Testing Scenarios
+#### 🚀 Advanced Testing Scenarios
 
 **Time-based Mixed Workload** (70% read, 30% write, 5-minute duration)
 - Creates 8 files (512MB each) with 64K block size

@@ -9,17 +9,22 @@ export STAGING_BUCKET=$GCS_BUCKET
 export TEMP_BUCKET=$GCS_BUCKET
 
 export JOB_CLUSTER_NAME=dingojob
+export IMG_VERSION=2.3-debian12
+export JOB_SERVER_MACHINE_TYPE=c2d-standard-4
 export MAX_IDLE=1h
-export DATAPROC_TIER=premium # standard
+
+# default engine setup
+# export DATAPROC_TIER=standard
+
+# Lightning Engine setup
+export DATAPROC_TIER=premium
+export ENALBE_NQE=true # only for premium tier
 
 export GCS_JAR_PATH="gs://dingoproc/jars/gcptest_2.12-0.1.0.jar"
 export GCS_FATJAR_PATH="gs://dingoproc/jars/gcptest-assembly-0.1.0.jar"
 export OUTPUT_PATH="gs://dingoproc/scala_output"
 
 pwd=$(pwd)
-
-export IMG_VERSION=2.3-debian12
-export JOB_SERVER_MACHINE_TYPE=c2d-standard-4
 
 __usage() {
     echo "Usage: ./spark.sh {histserver,jobserver,job}"
@@ -94,12 +99,52 @@ __job_server() {
         --project=$PROJECT_NAME
 }
 
+__job_properties() {
+    if [ "$ENALBE_NQE" = "true" ]; then
+        echo "spark.dataproc.engine=lightningEngine,
+          spark.dataproc.lightningEngine.runtime=native,
+          spark.executor.cores=4,
+          spark.executor.memory=2g,
+          spark.executor.memoryOverhead=1g,
+          spark.memory.offHeap.size=10g,
+          spark.driver.cores=4,
+          spark.driver.memory=12g,
+          spark.driver.memoryOverhead=1g,
+          spark.dynamicAllocation.enabled=true,
+          spark.dynamicAllocation.initialExecutors=2,
+          spark.dynamicAllocation.minExecutors=2,
+          spark.dynamicAllocation.maxExecutors=100,
+          spark.dynamicAllocation.executorAllocationRatio=1.0,
+          spark.decommission.maxRatio=0.3,
+          spark.reducer.fetchMigratedShuffle.enabled=true"
+    else
+        local properties="spark.executor.cores=4,
+          spark.executor.memory=12g,
+          spark.executor.memoryOverhead=512m,
+          spark.driver.cores=4,
+          spark.driver.memory=12g,
+          spark.driver.memoryOverhead=512m,
+          spark.dynamicAllocation.enabled=true,
+          spark.dynamicAllocation.initialExecutors=2,
+          spark.dynamicAllocation.minExecutors=2,
+          spark.dynamicAllocation.maxExecutors=100,
+          spark.dynamicAllocation.executorAllocationRatio=1.0,
+          spark.decommission.maxRatio=0.3,
+          spark.reducer.fetchMigratedShuffle.enabled=true"
+        if [ "$DATAPROC_TIER" = "premium" ]; then
+            properties="spark.dataproc.engine=lightningEngine,$properties"
+        fi
+        echo "$properties"
+    fi
+}
+
 __job() {
     gcloud dataproc jobs submit spark \
         --region=$REGION \
         --cluster=$JOB_CLUSTER_NAME \
         --class=GcpTest \
         --jars=$GCS_FATJAR_PATH \
+        --properties="$(__job_properties | tr -d '[:space:]')" \
         -- \
         $OUTPUT_PATH
 }

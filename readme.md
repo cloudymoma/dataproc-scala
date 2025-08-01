@@ -10,8 +10,6 @@ a [PHS](https://cloud.google.com/dataproc/docs/concepts/jobs/history-server)
 
 `make build` - build the job scala source code
 
-`make run` - run job on ephemeral job serser (highly customizable)
-
 `make run_serverless` - run batch job in dataproc serverless premium mode (N2 + LocalSSD shuffle)
 
 `make run_serverless_std` - run batch job in dataproc serverless standard mode
@@ -20,6 +18,14 @@ a [PHS](https://cloud.google.com/dataproc/docs/concepts/jobs/history-server)
 `make run_nqe` - run batch job in dataproc serverless mode but native query
 engine for boosted performance. run the qualification tool against the spark
 event logs dir to check the compatibilities of your jobs `make qualify`. (N2 + LocalSSD shuffle + native execution engine)
+
+`make run` - run job on ephemeral job serser (highly customizable). Now support [Lighting Engine](https://cloud.google.com/blog/products/data-analytics/introducing-lightning-engine-for-apache-spark?e=48754805) and Native Query Engine on top of if.
+
+You have to manually adjust the job configuration to fit your needs in [spark.sh](spark.sh). Same as `make run_nqe`, you will need to used the `make qualify` tool to check the compatibility of your job.
+
+`export DATAPROC_TIER=standard` - this is the default tier for job cluster.
+
+`export DATAPROC_TIER=premium` - this is the light engine for job cluster. Once you are on premium tier, you can set `export ENALBE_NQE=true` for native query engine execution. Note, the Native Query Engine is only available on Premium tier.
 
 Run [Spark Servlerless](https://cloud.google.com/products/serverless-spark) in [BigQuery](https://cloud.google.com/bigquery) as a stored procedure, click [here](https://github.com/cloudymoma/gcp-playgroud-public/blob/master/BigQuery/bq_spark.md)
 
@@ -107,9 +113,9 @@ Random Read/Writes – Async mode – 16K block size – Direct IO – 90% Reads
 fio --name=randrw --rw=randrw --direct=1 --ioengine=libaio --bs=16k --numjobs=8 --rwmixread=90 --size=1G --runtime=600 --group_reporting
 ```
 
-creates 8 files (numjobs=8) each with size 512MB (size) at 64K block size (bs=64k) and will perform random read/write (rw=randrw) with the mixed workload of 70% reads and 30% writes. 
+creates 8 files (numjobs=8) each with size 512MB (size) at 64K block size (bs=64k) and will perform random read/write (rw=randrw) with the mixed workload of 70% reads and 30% writes.
 The job will run for full 5 minutes (runtime=300 & time_based) even if the files were created and read/written.
-``` 
+```
 fio --name=randrw --ioengine=libaio --iodepth=1 --rw=randrw --bs=64k --direct=1 --size=512m --numjobs=8 --runtime=300 --group_reporting --time_based --rwmixread=70
  ```
 

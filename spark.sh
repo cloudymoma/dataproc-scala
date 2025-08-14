@@ -10,7 +10,8 @@ export TEMP_BUCKET=$GCS_BUCKET
 
 export JOB_CLUSTER_NAME=dingojob
 export IMG_VERSION=2.3-debian12
-export JOB_SERVER_MACHINE_TYPE=c2d-standard-4
+export JOB_MASTER_MACHINE_TYPE=c2d-standard-4
+export JOB_WORKER_MACHINE_TYPE=c2d-standard-4
 export MAX_IDLE=1h
 
 # default engine setup
@@ -66,7 +67,7 @@ __job_server() {
         --bucket=$STAGING_BUCKET \
         --temp-bucket=$TEMP_BUCKET \
         --tier=$DATAPROC_TIER \
-        --master-machine-type=$JOB_SERVER_MACHINE_TYPE \
+        --master-machine-type=$JOB_MASTER_MACHINE_TYPE \
         --num-masters=1 \
         --master-boot-disk-size=128GB \
         --master-boot-disk-type=pd-balanced \

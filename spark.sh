@@ -19,7 +19,7 @@ export MAX_IDLE=1h
 
 # Lightning Engine setup
 export DATAPROC_TIER=premium
-export ENALBE_NQE=true # only for premium tier
+export ENALBE_NQE=false # only for premium tier
 
 export GCS_JAR_PATH="gs://dingoproc/jars/gcptest_2.12-0.1.0.jar"
 export GCS_FATJAR_PATH="gs://dingoproc/jars/gcptest-assembly-0.1.0.jar"

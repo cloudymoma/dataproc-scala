@@ -17,37 +17,40 @@ Use the [CSV file generator](https://github.com/cloudymoma/csv_data_generator) f
 - **`make jobserver`** - Create an ephemeral job server with computing resource autoscaling, this is configurable through [autoscaling-policy.yml](autoscaling-policy.yml). Can be turned off.
 
 ### 🔨 Build and Run
-- **`make build`** - Build the Scala source code
-- **`make run`** - Run job on ephemeral cluster (highly customizable)
+- **`make build_local`** - Cross-build Scala `2.12` (Cluster `2.3`) and Scala `2.13` (Serverless `2.3`) JARs locally with sbt
+- **`make build_mvn`** - Cross-build both Scala `2.12` and `2.13` profiles locally with Maven
+- **`make build`** - Cross-build Scala `2.12` & `2.13` JARs and upload them to GCS
+- **`make run`** - Run job on ephemeral cluster (`2.3-debian12`, Spark `3.5.3`, Scala `2.12`)
   - Supports [Lightning Engine](https://cloud.google.com/blog/products/data-analytics/introducing-lightning-engine-for-apache-spark?e=48754805) and Native Query Engine
 
 ### ☁️ Serverless Execution
-- **`make run_serverless`** - Run batch job in Dataproc Serverless **premium** mode
+- **`make run_serverless`** - Run batch job on Managed Spark Serverless **`2.3`** (Spark `3.5.3`, Scala `2.13`) in **premium** tier (Lightning Engine)
   - Uses N2 instances + LocalSSD shuffle
-- **`make run_serverless_std`** - Run batch job in Dataproc Serverless **standard** mode
+- **`make run_serverless_std`** - Run batch job on Managed Spark Serverless **`2.3`** in **standard** tier
   - Uses E2 instances + pd-standard shuffle
-- **`make run_nqe`** - Run with Native Query Engine enabled
-  - Uses N2 + LocalSSD shuffle + native execution engine
+- **`make run_nqe`** - Run on Serverless **`2.3`** with Native Query Execution (`spark.dataproc.lightningEngine.runtime=native`)
+  - Uses premium tier + LocalSSD shuffle + native execution engine
   - Requires compatibility check with `make qualify`
 
 ### ✅ Job Compatibility
 - **`make qualify`** - Run qualification tool against Spark event logs to check job compatibility for **`NQE`**
+  - *Note:* Google Cloud now recommends the Serverless PySpark Qualification Job (`gs://qualification-tool/performance-boost-qualification.py` with `gs://qualification-tool/dataproc-perfboost-qualification-1.2.jar`) if direct downloads from `https://storage.googleapis.com/qualification-tool/` return 403.
 
 ## ⚙️ Configuration
 
-### 🎛️ Dataproc Cluster Tier Settings
+### 🎛️ Dataproc Cluster Engine Settings
 ```bash
-# Default tier (standard)
-export DATAPROC_TIER=standard
+# Standard engine (chosen at `make jobserver` time)
+export DATAPROC_ENGINE=default
 
-# Premium tier (Lightning Engine)
-export DATAPROC_TIER=premium
+# Lightning Engine (default in spark.sh, chosen at `make jobserver` time)
+export DATAPROC_ENGINE=lightning
 
-# Enable Native Query Engine (Premium tier only)
+# Enable Native Query Engine per job at `make run` time (Lightning Engine cluster only)
 export ENABLE_NQE=true
 ```
 
-> **Note:** Native Query Engine is only available on Premium tier clusters.
+> **Note:** `DATAPROC_ENGINE` is fixed at cluster creation (`make jobserver`, requires `2.3-debian12` or later for Lightning). `ENABLE_NQE=true` is checked against the cluster's actual engine at `make run` time and fails if the cluster is not a Lightning cluster. Legacy `DATAPROC_TIER=standard|premium` is still mapped automatically for compatibility.
 
 ### 📝 Job Configuration
 Manually adjust job configuration in [`spark.sh`](spark.sh) to fit your specific needs. When using NQE, always run the qualification tool first to ensure compatibility.

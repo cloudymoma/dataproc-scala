@@ -15,37 +15,40 @@
 - **`make jobserver`** - 创建具有计算资源自动缩放的临时作业服务器，可通过 [autoscaling-policy.yml](autoscaling-policy.yml) 配置。可以关闭。
 
 ### 🔨 构建和运行
-- **`make build`** - 构建 Scala 源代码
-- **`make run`** - 在临时集群上运行作业（高度可定制）
+- **`make build_local`** - 使用 sbt 在本地交叉构建 Scala `2.12`（Cluster `2.3`）和 Scala `2.13`（Serverless `2.3`）JAR
+- **`make build_mvn`** - 使用 Maven 在本地交叉构建 Scala `2.12` 和 `2.13` 两个 profile
+- **`make build`** - 交叉构建 Scala `2.12` 和 `2.13` JAR 并上传至 GCS
+- **`make run`** - 在临时集群（`2.3-debian12`，Spark `3.5.3`，Scala `2.12`）上运行作业
   - 支持 [闪电引擎](https://cloud.google.com/blog/products/data-analytics/introducing-lightning-engine-for-apache-spark?e=48754805) 和原生查询引擎
 
 ### ☁️ 无服务器执行
-- **`make run_serverless`** - 在 Dataproc 无服务器 **高级** 模式下运行批处理作业
+- **`make run_serverless`** - 在 Managed Spark Serverless **`2.3`**（Spark `3.5.3`，Scala `2.13`）**高级 (premium)** 层级运行批处理作业（闪电引擎）
   - 使用 N2 实例 + LocalSSD shuffle
-- **`make run_serverless_std`** - 在 Dataproc 无服务器 **标准** 模式下运行批处理作业
+- **`make run_serverless_std`** - 在 Managed Spark Serverless **`2.3`** **标准 (standard)** 层级运行批处理作业
   - 使用 E2 实例 + pd-standard shuffle
-- **`make run_nqe`** - 启用原生查询引擎运行
-  - 使用 N2 + LocalSSD shuffle + 原生执行引擎
+- **`make run_nqe`** - 在 Serverless **`2.3`** 上启用原生查询引擎运行（`spark.dataproc.lightningEngine.runtime=native`）
+  - 使用高级层级 + LocalSSD shuffle + 原生执行引擎
   - 需要使用 `make qualify` 进行兼容性检查
 
 ### ✅ 作业兼容性
 - **`make qualify`** - 针对 Spark 事件日志运行资格验证工具，检查 **`NQE`** 的作业兼容性
+  - *注意：* 如果直接下载 `https://storage.googleapis.com/qualification-tool/` 返回 403，Google Cloud 官方推荐使用 Serverless PySpark 资格验证作业（`gs://qualification-tool/performance-boost-qualification.py` 与 `gs://qualification-tool/dataproc-perfboost-qualification-1.2.jar`）。
 
 ## ⚙️ 配置
 
-### 🎛️ Dataproc 集群层级设置
+### 🎛️ Dataproc 集群引擎设置
 ```bash
-# Default tier (standard)
-export DATAPROC_TIER=standard
+# 标准引擎（在 `make jobserver` 创建集群时生效）
+export DATAPROC_ENGINE=default
 
-# Premium tier (Lightning Engine)
-export DATAPROC_TIER=premium
+# 闪电引擎（spark.sh 默认值，在 `make jobserver` 创建集群时生效）
+export DATAPROC_ENGINE=lightning
 
-# Enable Native Query Engine (Premium tier only)
+# 在 `make run` 提交作业时按作业启用原生查询引擎（仅限闪电引擎集群）
 export ENABLE_NQE=true
 ```
 
-> **注意：** 原生查询引擎仅在高级层级集群上可用。
+> **注意：** `DATAPROC_ENGINE` 在创建集群（`make jobserver`）时固定（闪电引擎需要 `2.3-debian12` 及以上镜像）。`make run` 在 `ENABLE_NQE=true` 时会检查目标集群的实际引擎，若非闪电引擎集群将直接报错退出。脚本仍自动兼容旧环境变量 `DATAPROC_TIER=standard|premium`。
 
 ### 📝 作业配置
 在 [`spark.sh`](spark.sh) 中手动调整作业配置以适应您的特定需求。使用 NQE 时，始终先运行资格验证工具以确保兼容性。

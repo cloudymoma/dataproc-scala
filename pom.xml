@@ -11,13 +11,30 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-        <scala.version>2.12.20</scala.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <!-- Default: Scala 2.12.18 for Managed Spark Cluster 2.3 (use -Pscala-2.13 for Serverless 2.3) -->
+        <scala.version>2.12.18</scala.version>
         <scala.binary.version>2.12</scala.binary.version>
-        <spark.version>3.5.6</spark.version>
+        <!-- Matches Spark 3.5.3 preinstalled on both Cluster 2.3 and Serverless 2.3 -->
+        <spark.version>3.5.3</spark.version>
+        <json4s.version>4.0.7</json4s.version>
+        <gcs.connector.version>3.1.13</gcs.connector.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>scala-2.12</id>
+        </profile>
+        <profile>
+            <id>scala-2.13</id>
+            <properties>
+                <scala.version>2.13.8</scala.version>
+                <scala.binary.version>2.13</scala.binary.version>
+            </properties>
+        </profile>
+    </profiles>
 
     <dependencies>
         <!-- Scala Library -->
@@ -25,6 +42,7 @@
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
             <version>${scala.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Spark Core - provided scope (like SBT provided) -->
@@ -47,19 +65,20 @@
         <dependency>
             <groupId>org.json4s</groupId>
             <artifactId>json4s-native_${scala.binary.version}</artifactId>
-            <version>4.0.7</version>
+            <version>${json4s.version}</version>
         </dependency>
 
         <!-- GCS Connector - provided scope -->
         <dependency>
             <groupId>com.google.cloud.bigdataoss</groupId>
             <artifactId>gcs-connector</artifactId>
-            <version>hadoop3-2.2.20</version>
+            <version>${gcs.connector.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
 
     <build>
+        <finalName>${project.artifactId}_${scala.binary.version}-${project.version}</finalName>
         <sourceDirectory>src/main/scala</sourceDirectory>
         <testSourceDirectory>src/test/scala</testSourceDirectory>
 
@@ -68,7 +87,7 @@
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
-                <version>4.8.1</version>
+                <version>4.10.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -79,6 +98,9 @@
                 </executions>
                 <configuration>
                     <scalaVersion>${scala.version}</scalaVersion>
+                    <args>
+                        <arg>-deprecation</arg>
+                    </args>
                 </configuration>
             </plugin>
 
@@ -86,7 +108,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.6.2</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -94,11 +116,12 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>${project.artifactId}-${project.version}-assembly</finalName>
+                            <finalName>${project.artifactId}_${scala.binary.version}-${project.version}-assembly</finalName>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>GcpTest</mainClass>
                                 </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>
                             <relocations>
                                 <!-- Equivalent to ShadeRule.rename in SBT -->
@@ -118,6 +141,7 @@
                                         <exclude>META-INF/LICENSE*</exclude>
                                         <exclude>META-INF/NOTICE*</exclude>
                                         <exclude>META-INF/DEPENDENCIES*</exclude>
+                                        <exclude>module-info.class</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
@@ -130,10 +154,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>3.16.0</version>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <release>11</release>
                 </configuration>
             </plugin>
         </plugins>

@@ -11,7 +11,7 @@ import org.json4s.native.JsonMethods._
 object GcpTest {
 
   // Implicit formats for json4s parsing
-  implicit val formats = DefaultFormats
+  implicit val formats: Formats = DefaultFormats
 
 	def run(Day: String): Unit ={
 		val conf = new SparkConf().setAppName("GCS FileIO Test")
@@ -27,7 +27,7 @@ object GcpTest {
         conf.set(
           "spark.hadoop.mapreduce.fileoutputcommitter.marksuccessfuljobs",
           "false")
-		val spark = SparkSession.builder.config(conf).enableHiveSupport().getOrCreate()
+		val spark = SparkSession.builder().config(conf).enableHiveSupport().getOrCreate()
 
         import spark.implicits._
 
@@ -331,7 +331,7 @@ object GcpTest {
 
     while (System.nanoTime() - startTime < testDurationNanos) {
       // The paths are loaded from the cached DataFrame of strings
-      val df = spark.read.format("binaryFile").load(filePathsForDf.as[String].collect(): _*)
+      val df = spark.read.format("binaryFile").load(filePathsForDf.as[String].collect().toIndexedSeq: _*)
       
       // Trigger action and collect stats
       val stats = df.select(sum("length"), count("*")).first()
@@ -366,7 +366,7 @@ object GcpTest {
     val localPath = "/tmp/fio"
     println(s"Downloading $gcsPath to $localPath")
     try {
-      val command = s"gsutil cp $gcsPath $localPath"
+      val command = s"gcloud storage cp $gcsPath $localPath"
       val result = command.! 
       if (result == 0) {
         println("File downloaded successfully.")
@@ -374,7 +374,7 @@ object GcpTest {
         s"chmod +x $localPath".!
         println(s"Made $localPath executable.")
       } else {
-        println(s"Error downloading file. gsutil exit code: $result")
+        println(s"Error downloading file. gcloud storage exit code: $result")
       }
     } catch {
       case e: Exception => println(s"An exception occurred during download: ${e.getMessage}")

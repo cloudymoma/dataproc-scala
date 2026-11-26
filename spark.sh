@@ -9,26 +9,33 @@ export STAGING_BUCKET=$GCS_BUCKET
 export TEMP_BUCKET=$GCS_BUCKET
 
 export JOB_CLUSTER_NAME=dingojob
+# Managed Spark Cluster 2.3 (Spark 3.5.3, Scala 2.12.18, Java 11; Lightning Engine & NQE GA)
 export IMG_VERSION=2.3-debian12
 export JOB_MASTER_MACHINE_TYPE=c2d-standard-4
 export JOB_WORKER_MACHINE_TYPE=c2d-standard-4
 export MAX_IDLE=1h
 
-# default engine setup
-# export DATAPROC_TIER=standard
+# Engine setup: "lightning" (Lightning Engine) or "default" (Standard engine)
+# Backwards-compatible mapping if legacy DATAPROC_TIER is exported
+if [ -z "${DATAPROC_ENGINE:-}" ] && [ -n "${DATAPROC_TIER:-}" ]; then
+    if [ "$DATAPROC_TIER" = "premium" ]; then
+        DATAPROC_ENGINE="lightning"
+    else
+        DATAPROC_ENGINE="default"
+    fi
+fi
+export DATAPROC_ENGINE="${DATAPROC_ENGINE:-lightning}"
+export ENABLE_NQE="${ENABLE_NQE:-false}" # only for lightning engine
 
-# Lightning Engine setup
-export DATAPROC_TIER=premium
-export ENALBE_NQE=false # only for premium tier
-
+# Cluster 2.3 uses Scala 2.12
 export GCS_JAR_PATH="gs://dingoproc/jars/gcptest_2.12-0.1.0.jar"
-export GCS_FATJAR_PATH="gs://dingoproc/jars/gcptest-assembly-0.1.0.jar"
+export GCS_FATJAR_PATH="gs://dingoproc/jars/gcptest_2.12-0.1.0-assembly.jar"
 export OUTPUT_PATH="gs://dingoproc/scala_output"
 
 pwd=$(pwd)
 
 __usage() {
-    echo "Usage: ./spark.sh {histserver,jobserver,job}"
+    echo "Usage: ./spark.sh {histserver,jobserver,job,policy}"
 }
 
 __hist_server() {
@@ -66,7 +73,7 @@ __job_server() {
         --max-idle=$MAX_IDLE \
         --bucket=$STAGING_BUCKET \
         --temp-bucket=$TEMP_BUCKET \
-        --tier=$DATAPROC_TIER \
+        --engine=$DATAPROC_ENGINE \
         --master-machine-type=$JOB_MASTER_MACHINE_TYPE \
         --num-masters=1 \
         --master-boot-disk-size=128GB \
@@ -101,9 +108,8 @@ __job_server() {
 }
 
 __job_properties() {
-    if [ "$ENALBE_NQE" = "true" ]; then
-        echo "spark.dataproc.engine=lightningEngine,
-          spark.dataproc.lightningEngine.runtime=native,
+    if [ "$ENABLE_NQE" = "true" ]; then
+        echo "spark.dataproc.lightningEngine.runtime=native,
           spark.executor.cores=4,
           spark.executor.memory=2g,
           spark.executor.memoryOverhead=1g,
@@ -119,7 +125,7 @@ __job_properties() {
           spark.decommission.maxRatio=0.3,
           spark.reducer.fetchMigratedShuffle.enabled=true"
     else
-        local properties="spark.executor.cores=4,
+        echo "spark.executor.cores=4,
           spark.executor.memory=12g,
           spark.executor.memoryOverhead=512m,
           spark.driver.cores=4,
@@ -132,16 +138,25 @@ __job_properties() {
           spark.dynamicAllocation.executorAllocationRatio=1.0,
           spark.decommission.maxRatio=0.3,
           spark.reducer.fetchMigratedShuffle.enabled=true"
-        if [ "$DATAPROC_TIER" = "premium" ]; then
-            properties="spark.dataproc.engine=lightningEngine,$properties"
-        fi
-        echo "$properties"
     fi
 }
 
 __job() {
+    if [ "$ENABLE_NQE" = "true" ]; then
+        local engine
+        engine=$(gcloud dataproc clusters describe "$JOB_CLUSTER_NAME" \
+            --region="$REGION" \
+            --project="$PROJECT_NAME" \
+            --format='value(config.engine)')
+        if [ "$engine" != "LIGHTNING" ]; then
+            echo "ENABLE_NQE=true needs a Lightning cluster; $JOB_CLUSTER_NAME engine is '${engine:-DEFAULT}'" >&2
+            exit 1
+        fi
+    fi
+
     gcloud dataproc jobs submit spark \
         --region=$REGION \
+        --project=$PROJECT_NAME \
         --cluster=$JOB_CLUSTER_NAME \
         --class=GcpTest \
         --jars=$GCS_FATJAR_PATH \
@@ -170,7 +185,8 @@ __main() {
                 __job
                 ;;
             *)
-                __usage
+                __usage >&2
+                exit 1
                 ;;
         esac
     fi
